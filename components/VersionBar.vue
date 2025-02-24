@@ -9,7 +9,9 @@ const versionInfo = useVersion()
     </div>
     <div class="flex">
       <div>Version: {{ versionInfo.version }}</div>
-      <div>Last Updated: {{ versionInfo.formatLastUpdated('date') }}</div>
+      <div class="ml-2">
+        Last Updated: {{ versionInfo.formatLastUpdated('date') }}
+      </div>
     </div>
   </div>
 </template>
