@@ -6,7 +6,7 @@ export default {
 
 <template>
   <div class="box-container">
-    <div class="box-title">
+    <div class="box-title font-bold text-xl">
       <slot name="title" />
     </div>
     <div class="box-content">
@@ -19,7 +19,7 @@ export default {
 .box-container {
   position: relative;
   border: 1px solid black;
-  padding: 20px;
+  padding: 15px;
   margin: 20px 0;
 }
 
@@ -29,10 +29,10 @@ export default {
   left: 15px;
   padding: 0 8px;
   background-color: white;
-  font-weight: bold;
+  font-family: 'Lustria';
 }
 
 .box-content {
-  margin-top: 10px;
+  font-family: 'Lato';
 }
 </style>
