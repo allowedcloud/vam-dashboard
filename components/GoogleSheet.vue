@@ -8,13 +8,18 @@ const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRoR0uoLPOdFH
 </script>
 
 <template>
-    <div class="border-2 border-red-500 border-solid sheet-wrapper">
+    <BoxContainer>
+      <template #title>
+        Bonus Program
+      </template>
+    <div class="sheet-wrapper">
       <iframe 
         :src="sheetUrl"
         frameborder="0"
         style="width: 100%; height: 600px;"
       ></iframe>
     </div>
+    </BoxContainer>
 </template>
 
 <style scoped>
