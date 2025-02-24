@@ -4,6 +4,7 @@
     <Header />
     <Weather />
     <ScheduleDisplay />
+    <GoogleSheet />
     <BoxContainer>
       <template #title>
         Weather
