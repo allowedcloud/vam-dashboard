@@ -1,11 +1,10 @@
-import process from 'node:process';
-
-const fs = require('node:fs');
-const path = require('node:path');
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
 
 function bumpVersion() {
   const packagePath = path.join(process.cwd(), 'package.json')
-  const pkg = require(packagePath)
+  const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'))
 
   // Split version into major.minor.patch
   const [major, minor, patch] = pkg.version.split('.').map(Number)
