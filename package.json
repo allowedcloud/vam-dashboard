@@ -9,7 +9,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "simple-git-hook && nuxt prepare"
+    "postinstall": "simple-git-hooks && nuxt prepare"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.751.0",
