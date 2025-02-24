@@ -25,4 +25,10 @@ export default defineNuxtConfig({
     version: process.env.npm_package_version || '0.0.0',
     lastUpdated: new Date().toISOString(),
   },
+  eslint: {
+    cache: false, // Try disabling cache first
+    lintOnStart: false, // Disable linting on start to reduce initial load
+    include: ['**/*.{js,jsx,ts,tsx,vue}'],
+    exclude: ['node_modules', 'dist']
+  }
 })
