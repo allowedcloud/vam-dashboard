@@ -17,11 +17,6 @@ function formatTime(date) {
   return `${hours}:${minutes}:${seconds} ${ampm}`
 }
 
-function formatDate(date) {
-  const options = { month: 'long', day: 'numeric' }
-  return date.toLocaleDateString('en-US', options)
-}
-
 function updateDateTime() {
   currentTime.value = new Date()
 }
@@ -39,16 +34,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="font-sans text-center flex justify-around w-full">
-    <div class="text-5xl text-gray-600">
-      Today is
-      <strong class="text-gray-800">
-        {{ formatDate(currentTime) }}
-      </strong>
-    </div>
-    <div class="font-mono text-5xl font-bold text-gray-800">
-      <span class="inline-block">{{ formatTime(currentTime).slice(0, -3) }}</span>
-      <span class="inline-block pl-4">{{ formatTime(currentTime).slice(-2) }}</span>
+  <div>
+    <div class="text-6xl font-bold text-gray-800 flex items-center">
+      <h1 class="w-[150px] mr-14 whitespace-nowrap">
+        {{ formatTime(currentTime).slice(0, -3) }}
+      </h1>
+      <h1 class="pl-4">
+        {{ formatTime(currentTime).slice(-2) }}
+      </h1>
     </div>
   </div>
 </template>

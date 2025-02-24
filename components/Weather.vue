@@ -66,10 +66,6 @@ async function fetchWeather() {
         rain: hourly.variables(3).valuesArray(),
       },
     }
-
-    console.log('Current time:', weatherData.value.current.time)
-    console.log('All hourly times:', weatherData.value.hourly.time)
-    console.log('First forecast hour:', weatherData.value.hourly.time[0])
   }
   catch (e) {
     error.value = 'Failed to fetch weather data'

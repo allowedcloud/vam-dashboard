@@ -21,6 +21,9 @@ interface ScheduleResponse {
 }
 
 const { data: scheduleData, error, pending } = await useFetch<ScheduleResponse>('/api/schedule')
+
+// Add console.log to see what we're getting
+// console.log('Schedule Data:', scheduleData.value)
 </script>
 
 <template>

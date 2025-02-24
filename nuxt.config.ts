@@ -7,11 +7,22 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     '@nuxtjs/tailwindcss',
+    '@nuxtjs/google-fonts',
   ],
   runtimeConfig: {
     // Server-side environment variables
     AWS_REGION: process.env.AWS_REGION,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+  googleFonts: {
+    families: {
+      Lustria: true,
+      Lato: true,
+    },
+  },
+  appConfig: {
+    version: process.env.npm_package_version || '0.0.0',
+    lastUpdated: new Date().toISOString(),
   },
 })

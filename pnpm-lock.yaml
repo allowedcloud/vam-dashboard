@@ -14,6 +14,9 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.751.0
         version: 3.751.0(@aws-sdk/client-dynamodb@3.751.0)
+      '@nuxtjs/google-fonts':
+        specifier: ^3.2.0
+        version: 3.2.0(magicast@0.3.5)
       h3:
         specifier: ^1.15.1
         version: 1.15.1
@@ -26,6 +29,9 @@ importers:
       openmeteo:
         specifier: ^1.1.4
         version: 1.1.4
+      simple-git-hooks:
+        specifier: ^2.11.1
+        version: 2.11.1
       vue:
         specifier: latest
         version: 3.5.13(typescript@5.7.3)
@@ -739,6 +745,9 @@ packages:
     engines: {node: ^18.12.0 || ^20.9.0 || >=22.0.0}
     peerDependencies:
       vue: ^3.3.4
+
+  '@nuxtjs/google-fonts@3.2.0':
+    resolution: {integrity: sha512-cGAjDJoeQ2jm6VJCo4AtSmKO6KjsbO9RSLj8q261fD0lMVNMZCxkCxBkg8L0/2Vfgp+5QBHWVXL71p1tiybJFw==}
 
   '@nuxtjs/tailwindcss@6.13.1':
     resolution: {integrity: sha512-atL2SaPsxLfMTlXUQvr1UpDYdz6ocNOhH35H+t7M++g4r79QiQScJ7XuyyMR9AyBN19lkPA3nw7NXxazXmYxlA==}
@@ -2492,6 +2501,9 @@ packages:
     resolution: {integrity: sha512-0Ia46fDOaT7k4og1PDW4YbodWWr3scS2vAr2lTbsplOt2WkKp0vQbkI9wKis/T5LV/dqPjO3bpS/z6GTJB82LA==}
     engines: {node: '>=18'}
 
+  google-fonts-helper@3.6.0:
+    resolution: {integrity: sha512-ReantWd/l8dedKqTYjvqaQ55rAl/rbRqWL5VXHNXtGwIhMX4N8VNA7V19drr7xiv5G3pzlYID0K4FauvGqnWEg==}
+
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -3914,6 +3926,10 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
+
+  simple-git-hooks@2.11.1:
+    resolution: {integrity: sha512-tgqwPUMDcNDhuf1Xf6KTUsyeqGdgKMhzaH4PAZZuzguOgTl5uuyeYe/8mWgAr6IBxB5V06uqEf6Dy37gIWDtDg==}
+    hasBin: true
 
   simple-git@3.27.0:
     resolution: {integrity: sha512-ivHoFS9Yi9GY49ogc6/YAi3Fl9ROnF4VyubNylgCkA+RVqLaKWnDSzXOVzya8csELIaWaYNutsEuAhZrtOjozA==}
@@ -5750,6 +5766,15 @@ snapshots:
       - vti
       - vue-tsc
       - yaml
+
+  '@nuxtjs/google-fonts@3.2.0(magicast@0.3.5)':
+    dependencies:
+      '@nuxt/kit': 3.15.4(magicast@0.3.5)
+      google-fonts-helper: 3.6.0
+      pathe: 1.1.2
+    transitivePeerDependencies:
+      - magicast
+      - supports-color
 
   '@nuxtjs/tailwindcss@6.13.1(magicast@0.3.5)':
     dependencies:
@@ -7744,6 +7769,13 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.3.0
 
+  google-fonts-helper@3.6.0:
+    dependencies:
+      deepmerge: 4.3.1
+      hookable: 5.5.3
+      ofetch: 1.4.1
+      ufo: 1.5.4
+
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
@@ -9505,6 +9537,8 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
+
+  simple-git-hooks@2.11.1: {}
 
   simple-git@3.27.0:
     dependencies:
