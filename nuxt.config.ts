@@ -17,8 +17,9 @@ export default defineNuxtConfig({
   },
   googleFonts: {
     families: {
-      Lustria: true,
-      Lato: true,
+      'Lustria': true,
+      'Lato': true,
+      'Space Mono': true,
     },
   },
   appConfig: {
@@ -29,6 +30,6 @@ export default defineNuxtConfig({
     cache: false, // Try disabling cache first
     lintOnStart: false, // Disable linting on start to reduce initial load
     include: ['**/*.{js,jsx,ts,tsx,vue}'],
-    exclude: ['node_modules', 'dist']
-  }
+    exclude: ['node_modules', 'dist'],
+  },
 })

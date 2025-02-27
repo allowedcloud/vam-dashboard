@@ -3,7 +3,7 @@ const versionInfo = useVersion()
 </script>
 
 <template>
-  <div class="bg-[#3D4EFF] text-white flex justify-between px-4">
+  <div class="font-mono bg-[#3D4EFF] text-white flex justify-between px-4">
     <div>
       VAM Office Dashboard
     </div>
@@ -15,3 +15,9 @@ const versionInfo = useVersion()
     </div>
   </div>
 </template>
+
+<style scoped>
+.annc {
+  font-family: 'Space Mono' !important
+}
+</style>
