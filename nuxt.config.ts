@@ -9,6 +9,9 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/google-fonts',
   ],
+  tailwindcss: {
+    cssPath: '~/assets/css/tailwind.css',
+  },
   runtimeConfig: {
     // Server-side environment variables
     AWS_REGION: process.env.AWS_REGION,
