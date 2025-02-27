@@ -45,7 +45,7 @@ const shouldDisplayTime = (time: string): boolean => {
       <div class="grid gap-4">
         <div v-for="(schedule, key) in scheduleData?.schedules"
              :key="schedule.contentId"
-             class="bg-slate-100 shadow rounded-lg p-4">
+             class="bg-slate-100 shadow-lg rounded-lg p-4">
           <div class="flex justify-between items-start mb-2">
             <h3 class="text-xl font-bold">{{ schedule.customer }}</h3>
           <div class="text-gray-600">
