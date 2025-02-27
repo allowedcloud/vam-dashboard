@@ -76,14 +76,14 @@ export default defineEventHandler(async (event) => {
       timestamp.getDate() === currentTime.getDate()
     )
 
-    const next6HoursIndices = Array.from({ length: 6 }, (_, i) => currentHourIndex + i)
+    const next12HoursIndices = Array.from({ length: 12 }, (_, i) => currentHourIndex + i)
 
     const filteredHourlyData = {
-      time: next6HoursIndices.map(i => hourlyTimestamps[i]),
-      temperature2m: next6HoursIndices.map(i => hourlyTemp[i]),
-      relativeHumidity2m: next6HoursIndices.map(i => hourlyHumidity[i]),
-      precipitationProbability: next6HoursIndices.map(i => hourlyPrecipProb[i]),
-      rain: next6HoursIndices.map(i => hourlyRain[i]),
+      time: next12HoursIndices.map(i => hourlyTimestamps[i]),
+      temperature2m: next12HoursIndices.map(i => hourlyTemp[i]),
+      relativeHumidity2m: next12HoursIndices.map(i => hourlyHumidity[i]),
+      precipitationProbability: next12HoursIndices.map(i => hourlyPrecipProb[i]),
+      rain: next12HoursIndices.map(i => hourlyRain[i]),
     }
 
     return {
