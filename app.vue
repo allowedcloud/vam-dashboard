@@ -5,7 +5,7 @@
       <Header />
       <Announcements />
     </div>
-    <div class="flex-1 bg-gray-50 px-6">
+    <div class="flex-1 px-6">
       <div class="grid grid-cols-12 gap-6">
         <!-- Left column - GoogleSheet -->
         <div class="col-span-8">
