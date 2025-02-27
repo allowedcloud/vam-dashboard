@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
       wind_speed_unit: 'mph',
       precipitation_unit: 'inch',
       timezone: 'America/New_York',
-      forecast_days: 1,
+      forecast_days: 2,
     }
 
     const url = 'https://api.open-meteo.com/v1/forecast'
@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get the current weather variables
     const temperature = current.variables(0)?.value()
     const humidity = current.variables(1)?.value()
     const apparentTemp = current.variables(2)?.value()
@@ -48,7 +47,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get the hourly forecast variables
     const hourlyTemp = hourly.variables(0)?.valuesArray()
     const hourlyHumidity = hourly.variables(1)?.valuesArray()
     const hourlyPrecipProb = hourly.variables(2)?.valuesArray()
@@ -66,9 +64,26 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Helper function for time range
     const range = (start: number, stop: number, step: number) => {
       return Array.from({ length: (stop - start) / step }, (_, i) => start + i * step)
+    }
+
+    const hourlyTimestamps = range(Number(hourly.time()), Number(hourly.timeEnd()), hourly.interval())
+      .map(t => new Date(t * 1000))
+    const currentTime = new Date(Number(current.time()) * 1000)
+    const currentHourIndex = hourlyTimestamps.findIndex(timestamp =>
+      timestamp.getHours() === currentTime.getHours() &&
+      timestamp.getDate() === currentTime.getDate()
+    )
+
+    const next6HoursIndices = Array.from({ length: 6 }, (_, i) => currentHourIndex + i)
+
+    const filteredHourlyData = {
+      time: next6HoursIndices.map(i => hourlyTimestamps[i]),
+      temperature2m: next6HoursIndices.map(i => hourlyTemp[i]),
+      relativeHumidity2m: next6HoursIndices.map(i => hourlyHumidity[i]),
+      precipitationProbability: next6HoursIndices.map(i => hourlyPrecipProb[i]),
+      rain: next6HoursIndices.map(i => hourlyRain[i]),
     }
 
     return {
@@ -80,15 +95,7 @@ export default defineEventHandler(async (event) => {
         precipitation: precipitation,
         rain: rain,
       },
-      hourly: {
-        time: range(Number(hourly.time()), Number(hourly.timeEnd()), hourly.interval()).map(
-          t => new Date(t * 1000),
-        ),
-        temperature2m: hourlyTemp,
-        relativeHumidity2m: hourlyHumidity,
-        precipitationProbability: hourlyPrecipProb,
-        rain: hourlyRain,
-      },
+      hourly: filteredHourlyData,
     }
   }
   catch (e) {

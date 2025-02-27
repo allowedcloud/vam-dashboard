@@ -1,10 +1,11 @@
 <script setup>
 import { Cloud, CloudRain, CloudSun, Sun } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const weatherData = ref(null)
 const loading = ref(true)
 const error = ref(null)
+let weatherInterval = null
 
 function getWeatherColor(temperature) {
   if (temperature >= 85)
@@ -46,6 +47,14 @@ function formatTime(date) {
 
 onMounted(() => {
   fetchWeather()
+  weatherInterval = setInterval(() => {
+    fetchWeather()
+  }, 15 * 60 * 1000)
+})
+
+onUnmounted(() => {
+  if (weatherInterval)
+    clearInterval(weatherInterval)
 })
 </script>
 
@@ -61,7 +70,6 @@ onMounted(() => {
 
     <div v-else-if="weatherData" class="bg-slate-100 rounded-xl shadow-lg overflow-hidden">
       <div class="flex flex-col md:flex-row">
-        <!-- Current Weather Section - 35% width -->
         <div class="w-full md:w-[35%] p-6 border-b md:border-b-0 md:border-r border-slate-200">
           <h2 class="text-2xl font-bold text-slate-800 mb-4">
             Current Weather
@@ -113,7 +121,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Hourly Forecast Section - 65% width -->
         <div class="w-full md:w-[65%] p-6">
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div
