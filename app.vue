@@ -17,6 +17,7 @@
           <div class="space-y-6">
             <ScheduleDisplay />
             <Weather />
+            <GoogleReviews />
           </div>
         </div>
       </div>
