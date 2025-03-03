@@ -20,7 +20,7 @@ export default {
   position: relative;
   border: 1px solid black;
   padding: 15px;
-  margin: 20px 0;
+  margin: 40px 0;
 }
 
 .box-title {
@@ -29,6 +29,8 @@ export default {
   left: 15px;
   padding: 0 8px;
   background-color: white;
+  color: #3D4EFF;
+  border: 1px solid black;
   font-family: 'Lustria';
 }
 

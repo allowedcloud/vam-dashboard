@@ -29,9 +29,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <BoxContainer>
+  <BoxContainer class="marg bg-slate-100">
     <template #title>
-      <div class="mb-4 flex items-center">
+      <div class="flex items-center">
         Google Reviews
         <div v-if="reviewData" class="flex items-center ml-4">
           <div class="flex text-yellow-400">
@@ -45,7 +45,7 @@ onMounted(() => {
             </span>
           </div>
           <span class="ml-1 text-sm font-medium">{{ reviewData.rating.toFixed(1) }}/5</span>
-          <span class="ml-2 text-sm text-gray-600">({{ reviewData.totalReviews }} reviews)</span>
+          <span class="ml-2 text-sm">({{ reviewData.totalReviews }} reviews)</span>
         </div>
       </div>
     </template>
@@ -68,7 +68,7 @@ onMounted(() => {
       <div v-else-if="reviewData?.reviews?.length" class="space-y-4 mt-4">
         <div
           v-for="(review, index) in reviewData.reviews" :key="index"
-          class="p-4 bg-slate-100 rounded shadow-lg border border-gray-100"
+          class="p-4 bg-white rounded shadow-lg border border-gray-100"
         >
           <div class="flex items-start">
             <img
@@ -117,3 +117,9 @@ onMounted(() => {
     </div>
   </BoxContainer>
 </template>
+
+<style>
+.marg {
+  margin-top: 40px !important;
+}
+</style>

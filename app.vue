@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex flex-col">
-    <div class="p-6">
+    <div class="pt-6 px-6">
       <VersionBar />
       <Header />
       <Announcements />
@@ -10,6 +10,7 @@
         <!-- Left column - GoogleSheet -->
         <div class="col-span-8">
           <GoogleSheet />
+          <InstagramFeed />
         </div>
 
         <!-- Right column - Schedule and Weather -->

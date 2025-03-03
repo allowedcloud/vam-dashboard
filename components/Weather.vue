@@ -59,7 +59,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <BoxContainer>
+  <BoxContainer class="bg-slate-100">
     <template #title>
       Weather
     </template>
@@ -134,7 +134,7 @@ onUnmounted(() => {
                     return new Date(forecastTime) >= new Date(weatherData.current.time)
                   })"
                 :key="index"
-                class="bg-slate-100 rounded-lg p-4 shadow-md text-center"
+                class="bg-white rounded-lg p-4 shadow-md text-center"
               >
                 <div class="mb-2">
                   <CloudRain
