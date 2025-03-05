@@ -1,5 +1,5 @@
 <script setup>
-const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRoR0uoLPOdFHS8ExngxRmgtU742hh6kn4WrsM-C7UgMsQD2wjc273Ol4a1olkSmtDfwXW_l_T-wqe/pubhtml?'
+const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZtftrxScULQxQmpMMbPkpYl0kmUSKWuANJAdQu2eYA0XwjeGmKpdvpkCJVWDelfI306iOopmCiFTA/pubhtml?'
   + 'widget=true' // Makes it more compact
   + '&headers=false' // Hides Google Sheets header
   + '&chrome=false' // Removes UI chrome
@@ -12,11 +12,11 @@ const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRoR0uoLPOdFH
     <template #title>
       Bonus Program
     </template>
-    <div class="sheet-wrapper">
+    <div class="sheet-wrapper mt-4">
       <iframe
         :src="sheetUrl"
         frameborder="0"
-        style="width: 100%; height: 600px;"
+        style="width: 100%; height: 675px;"
       />
     </div>
   </BoxContainer>
