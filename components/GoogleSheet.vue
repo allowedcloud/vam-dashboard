@@ -27,6 +27,7 @@ const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZtftrxScULQx
   position: relative;
   width: 100%;
   overflow: hidden;
+  zoom: 120%;
 }
 
 .sheet-wrapper iframe {
