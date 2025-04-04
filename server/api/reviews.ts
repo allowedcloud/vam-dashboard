@@ -3,14 +3,11 @@ import { defineEventHandler, setResponseHeader } from 'h3';
 
 export default defineEventHandler(async (event) => {
   try {
-    // Force the content type to ensure Nuxt treats this as an API
     setResponseHeader(event, 'Content-Type', 'application/json');
-    
-    // Get environment variables
+
     const PLACE_ID = process.env.GOOGLE_PLACE_ID || '';
     const API_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
 
-    // Check required parameters
     if (!PLACE_ID || !API_KEY) {
       return {
         error: 'Configuration error',
@@ -18,12 +15,11 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    // The Places API V1 may require a different format for place IDs
     const formattedPlaceId = PLACE_ID.startsWith('places/') ? PLACE_ID : `places/${PLACE_ID}`;
     const url = `https://places.googleapis.com/v1/${formattedPlaceId}`;
-    
+
     console.log('Fetching from URL:', url);
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -42,18 +38,16 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    // Safely parse JSON response
     let data;
     try {
       const responseText = await response.text();
       console.log('Raw API response:', responseText.substring(0, 1000));
       data = JSON.parse(responseText);
-      
-      // Log the exact structure of the first review if available
+
       if (data.reviews && data.reviews.length > 0) {
         console.log('First review structure:', JSON.stringify(data.reviews[0], null, 2));
       }
-      
+
       console.log('Available fields at root level:', Object.keys(data));
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
@@ -62,8 +56,7 @@ export default defineEventHandler(async (event) => {
         details: parseError.message
       };
     }
-    
-    // Process the response to extract only review information
+
     const result = {
       name: data.name || '',
       rating: data.rating || 0,
@@ -71,21 +64,54 @@ export default defineEventHandler(async (event) => {
       reviews: []
     };
 
-    // Map reviews if they exist
     if (data.reviews && Array.isArray(data.reviews)) {
-      result.reviews = data.reviews.map((review) => ({
-        author: review.author_name || review.authorAttribution?.displayName || 'Anonymous',
-        profilePhoto: review.profile_photo_url || review.authorAttribution?.photoUri || '',
-        rating: review.rating || 0,
-        text: review.text?.text || review.text || '',
-        time: review.time || review.publishTime || '',
-        relativeTimeDescription: review.relative_time_description || review.relativePublishTimeDescription || ''
-      }));
+      result.reviews = data.reviews.map((review) => {
+        let reviewDate;
+        if (review.publishTime) {
+          reviewDate = review.publishTime;
+        } else if (review.time) {
+          reviewDate = typeof review.time === 'number' ?
+            new Date(review.time * 1000).toISOString() : review.time;
+        } else {
+          reviewDate = new Date().toISOString();
+        }
 
-      // Sort reviews by most recent first
-      result.reviews.sort((a, b) => 
-        new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+        console.log(`Review date extraction: Original:`,
+          review.time || review.publishTime,
+          `Parsed:`, reviewDate);
+        return {
+          author: review.author_name || (review.authorAttribution?.displayName) || 'Anonymous',
+          profilePhoto: review.profile_photo_url || (review.authorAttribution?.photoUri) || '',
+          rating: review.rating || 0,
+          text: review.text?.text || review.text || '',
+          time: reviewDate,
+          relativeTimeDescription: review.relative_time_description ||
+            review.relativePublishTimeDescription || ''
+        };
+      });
+
+      console.log('Review dates before sorting:',
+        result.reviews.map(r => ({ author: r.author, date: r.time })));
+
+      result.reviews.sort((a, b) => {
+        try {
+          const dateA = new Date(a.time);
+          const dateB = new Date(b.time);
+
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            console.warn('Invalid date found during sorting:', { a: a.time, b: b.time });
+            return 0;
+          }
+
+          return dateB.getTime() - dateA.getTime();
+        } catch (err) {
+          console.error('Error during date sorting:', err, { a: a.time, b: b.time });
+          return 0;
+        }
+      });
+
+      console.log('Review dates after sorting:',
+        result.reviews.map(r => ({ author: r.author, date: r.time })));
     }
 
     return result;

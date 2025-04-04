@@ -1,4 +1,4 @@
 export default defineAppConfig({
-  "version": "0.1.3",
-  "lastUpdated": "2025-03-05T13:14:41.666Z"
+  "version": "0.1.4",
+  "lastUpdated": "2025-04-04T10:18:05.869Z"
 })
