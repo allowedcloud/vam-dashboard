@@ -3,7 +3,7 @@
     <div class="pt-6 px-6">
       <VersionBar />
       <Header />
-      <Announcements />
+      <!-- <Announcements /> -->
     </div>
     <div class="flex-1 px-6">
       <div class="grid grid-cols-12 gap-6">
