@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
   try {
     // Instagram Graph API endpoint
     const limit = 12
-    const apiUrl = `https://graph.instagram.com/v18.0/${instagramAccountId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,username&limit=${limit}&access_token=${instagramAccessToken}`
+    // const apiUrl = `https://graph.instagram.com/v18.0/${instagramAccountId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,username&limit=${limit}&access_token=${instagramAccessToken}`
+    const apiUrl = `https://graph.instagram.com/v18.0/${instagramAccountId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,username,children{media_url,media_type,thumbnail_url}&limit=${limit}&access_token=${instagramAccessToken}`
 
     const response = await fetch(apiUrl)
 

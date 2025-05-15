@@ -1,18 +1,33 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useInstagram } from '~/composables/useInstagram'
 
-// Use the Instagram composable
 const { posts, loading, error, fetchPosts, formatPosts } = useInstagram()
 
-// Keep track of expanded captions
 const expandedCaptions = ref(new Set())
 const maxCaptionLength = 100
 
-// Format the posts for display
+const currentImageIndexes = ref({})
+const carouselIntervals = ref({})
 const formattedPosts = computed(() => formatPosts())
 
-// Format date to a more readable format
+function initializeCarousel(postId, childrenLength) {
+  if (childrenLength <= 1)
+    return
+
+  currentImageIndexes.value[postId] = 0
+
+  carouselIntervals.value[postId] = setInterval(() => {
+    currentImageIndexes.value[postId]
+      = (currentImageIndexes.value[postId] + 1) % childrenLength
+  }, 5000)
+}
+
+onBeforeUnmount(() => {
+  Object.values(carouselIntervals.value).forEach((interval) => {
+    clearInterval(interval)
+  })
+})
 function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -21,19 +36,24 @@ function formatDate(timestamp) {
   })
 }
 
-// Truncate long captions
 function truncateCaption(caption) {
   if (caption.length <= maxCaptionLength)
     return caption
   return `${caption.substring(0, maxCaptionLength)}...`
 }
 
-// Expand caption when "Read more" is clicked
 function expandCaption(postId) {
   expandedCaptions.value.add(postId)
 }
 
-// Fetch Instagram posts when component is mounted
+watch(() => formattedPosts.value, (newPosts) => {
+  newPosts.forEach((post) => {
+    if (post.children?.length > 1) {
+      initializeCarousel(post.id, post.children.length)
+    }
+  })
+}, { immediate: true })
+
 onMounted(() => {
   fetchPosts()
 })
@@ -45,12 +65,10 @@ onMounted(() => {
       Instagram
     </template>
     <div class="instagram-feed bg-slate-100">
-      <!-- Loading state -->
       <div v-if="loading" class="instagram-feed__loading">
         <p>Loading Instagram feed...</p>
       </div>
 
-      <!-- Error state -->
       <div v-else-if="error" class="instagram-feed__error">
         <p>Error loading Instagram feed: {{ error }}</p>
         <button class="instagram-feed__retry-btn" @click="fetchPosts">
@@ -58,11 +76,9 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- Display feed -->
       <div v-else-if="formattedPosts.length > 0" class="instagram-feed__grid">
         <div v-for="post in formattedPosts" :key="post.id" class="instagram-post">
           <a :href="post.permalink" target="_blank" rel="noopener noreferrer" class="instagram-post__link">
-            <!-- Video post -->
             <video
               v-if="post.type === 'video'"
               controls
@@ -73,14 +89,27 @@ onMounted(() => {
               Your browser does not support video playback.
             </video>
 
-            <!-- Image post -->
-            <img
-              v-else
-              :src="post.mediaUrl"
-              :alt="`Instagram post by ${post.username}`"
-              class="instagram-post__media"
-              loading="lazy"
-            >
+            <div v-else class="instagram-post__media-container">
+              <img
+                v-if="!post.children?.length"
+                :src="post.mediaUrl"
+                :alt="`Instagram post by ${post.username}`"
+                class="instagram-post__media"
+                loading="lazy"
+              >
+
+              <transition-group v-else name="fade">
+                <img
+                  v-for="(child, index) in post.children"
+                  v-show="currentImageIndexes[post.id] === index"
+                  :key="`${post.id}-${index}`"
+                  :src="child.mediaUrl"
+                  :alt="`Instagram post by ${post.username}`"
+                  class="instagram-post__media"
+                  loading="lazy"
+                >
+              </transition-group>
+            </div>
           </a>
 
           <div class="instagram-post__content">
@@ -102,7 +131,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Empty state -->
       <div v-else class="instagram-feed__empty">
         <p>No Instagram posts available.</p>
       </div>
@@ -159,31 +187,41 @@ onMounted(() => {
     display: block;
   }
 
-  .instagram-post__media {
+.instagram-post__media-container {
+  position: relative;
     width: 100%;
     height: 300px;
-    object-fit: cover;
-    display: block;
+  overflow: hidden;
   }
 
-  .instagram-post__content {
-    padding: 1rem;
+.instagram-post__media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   }
 
-  .instagram-post__date {
-    font-size: 0.85rem;
-    color: #8e8e8e;
-    margin-bottom: 0.5rem;
+.instagram-post__content {
+  padding: 1rem;
   }
 
-  .instagram-post__caption {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #262626;
-    margin: 0;
+.instagram-post__date {
+  font-size: 0.85rem;
+  color: #8e8e8e;
+  margin-bottom: 0.5rem;
   }
 
-  .instagram-post__read-more {
+.instagram-post__caption {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #262626;
+  margin: 0;
+}
+
+.instagram-post__read-more {
     background: none;
     border: none;
     padding: 0;
@@ -198,14 +236,41 @@ onMounted(() => {
     text-decoration: underline;
   }
 
-  /* Responsive styles */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.fade-enter-active {
+  transition-delay: 0s;
+}
+
+.fade-leave-active {
+  transition-delay: 0s;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
   @media (max-width: 768px) {
     .instagram-feed__grid {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1rem;
     }
 
-    .instagram-post__media {
+  .instagram-post__media-container {
       height: 250px;
     }
   }

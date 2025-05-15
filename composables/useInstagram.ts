@@ -5,7 +5,6 @@ export const useInstagram = () => {
   const loading = ref(false)
   const error = ref(null)
 
-  // Fetch Instagram posts
   const fetchPosts = async () => {
     loading.value = true
     error.value = null
@@ -26,7 +25,6 @@ export const useInstagram = () => {
     }
   }
 
-  // Format post data for display
   const formatPosts = () => {
     return posts.value.map(post => ({
       id: post.id,
@@ -36,7 +34,12 @@ export const useInstagram = () => {
       thumbnailUrl: post.thumbnail_url || post.media_url,
       timestamp: new Date(post.timestamp),
       username: post.username,
-      type: post.media_type.toLowerCase()
+      type: post.media_type.toLowerCase(),
+      children: post.children?.data.map(child => ({
+        mediaUrl: child.media_url,
+        thumbnailUrl: child.thumbnail_url || child.media_url,
+        type: child.media_type.toLowerCase()
+      })) || []
     }))
   }
 
