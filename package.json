@@ -8,11 +8,22 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "screenshot:dashboard": "node scripts/capture-dashboard-screenshot.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@unovis/vue": "^1.6.4",
+    "@vueuse/core": "^14.2.1",
+    "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
+    "lucide-vue-next": "^0.577.0",
+    "maplibre-gl": "^5.19.0",
     "nuxt": "^4.3.0",
+    "reka-ui": "^2.9.0",
     "shadcn-nuxt": "2.4.3",
+    "tailwind-merge": "^3.5.0",
+    "topojson-client": "^3.1.0",
+    "us-atlas": "^3.0.1",
     "vue": "^3.5.27",
     "vue-router": "^4.6.4"
   },
@@ -20,6 +31,7 @@
     "@antfu/eslint-config": "^7.2.0",
     "@nuxtjs/tailwindcss": "7.0.0-beta.1",
     "eslint": "^9.39.2",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4.1.18"
   }
 }
