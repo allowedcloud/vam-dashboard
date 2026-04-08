@@ -29,58 +29,6 @@ const mapReady = ref(false)
 let map: any
 let maplibreglModule: any
 
-function pointDistance(a: MoveMapPoint, b: MoveMapPoint) {
-  const deltaLongitude = a.longitude - b.longitude
-  const deltaLatitude = a.latitude - b.latitude
-  return Math.sqrt(deltaLongitude ** 2 + deltaLatitude ** 2)
-}
-
-function spreadNearbyPoints(points: MoveMapPoint[]) {
-  const groups: MoveMapPoint[][] = []
-  const proximityThreshold = 0.04
-
-  for (const point of points) {
-    const group = groups.find(existingGroup =>
-      existingGroup.some(existingPoint => pointDistance(existingPoint, point) <= proximityThreshold),
-    )
-
-    if (group) {
-      group.push(point)
-      continue
-    }
-
-    groups.push([point])
-  }
-
-  return groups.flatMap((group) => {
-    if (group.length === 1) {
-      return group
-    }
-
-    const sortedGroup = group
-      .slice()
-      .sort((a, b) => b.moveCount - a.moveCount || a.latitude - b.latitude || a.longitude - b.longitude)
-
-    const centerLatitude = sortedGroup.reduce((total, point) => total + point.latitude, 0) / sortedGroup.length
-    const centerLongitude = sortedGroup.reduce((total, point) => total + point.longitude, 0) / sortedGroup.length
-    const baseRadius = 0.0085
-
-    return sortedGroup.map((point, index) => {
-      const ring = Math.floor(index / 6)
-      const ringSize = 6 * (ring + 1)
-      const slot = index % ringSize
-      const angle = (Math.PI * 2 * slot) / ringSize
-      const radius = baseRadius * (ring + 1)
-
-      return {
-        ...point,
-        longitude: centerLongitude + Math.cos(angle) * radius,
-        latitude: centerLatitude + Math.sin(angle) * radius * 0.72,
-      }
-    })
-  })
-}
-
 const visiblePoints = computed(() => {
   return props.points.filter(point =>
     point.longitude >= REGIONAL_BOUNDS.west
@@ -90,11 +38,9 @@ const visiblePoints = computed(() => {
   )
 })
 
-const displayPoints = computed(() => spreadNearbyPoints(visiblePoints.value))
-
 const geoJson = computed(() => ({
   type: 'FeatureCollection' as const,
-  features: displayPoints.value.map(point => ({
+  features: visiblePoints.value.map(point => ({
     type: 'Feature' as const,
     properties: {
       moveCount: point.moveCount,
@@ -189,15 +135,56 @@ async function initializeMap() {
     map.addSource('destinations', {
       type: 'geojson',
       data: geoJson.value,
+      cluster: true,
+      clusterRadius: 42,
+      clusterMaxZoom: 12,
+    })
+
+    map.addLayer({
+      id: 'destination-clusters',
+      type: 'circle',
+      source: 'destinations',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': '#3d4eff',
+        'circle-opacity': 0.2,
+        'circle-stroke-color': '#3d4eff',
+        'circle-stroke-opacity': 0.55,
+        'circle-stroke-width': 1.5,
+        'circle-radius': [
+          'step',
+          ['coalesce', ['get', 'point_count'], 1],
+          11,
+          3, 14,
+          6, 17,
+          10, 21,
+        ],
+      },
+    })
+
+    map.addLayer({
+      id: 'destination-cluster-count',
+      type: 'symbol',
+      source: 'destinations',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': ['get', 'point_count_abbreviated'],
+        'text-size': 11,
+        'text-font': ['Open Sans Bold'],
+      },
+      paint: {
+        'text-color': '#2535d4',
+      },
     })
 
     map.addLayer({
       id: 'destination-dots',
       type: 'circle',
       source: 'destinations',
+      filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': '#016fb9',
-        'circle-opacity': 0.72,
+        'circle-color': '#3d4eff',
+        'circle-opacity': 0.78,
         'circle-stroke-color': 'rgba(255,255,255,0.92)',
         'circle-stroke-width': 1,
         'circle-radius': [

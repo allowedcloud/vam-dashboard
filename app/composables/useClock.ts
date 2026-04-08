@@ -16,8 +16,10 @@ export function useClock() {
     }
 
     return now.value.toLocaleDateString('en-US', {
+      weekday: 'long',
       month: 'long',
       day: 'numeric',
+      year: 'numeric',
     })
   })
 

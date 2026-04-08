@@ -158,10 +158,16 @@ const chartConfig = {
 }
 
 const weekChartElement = useTemplateRef<HTMLDivElement>('weekChartElement')
+const monthChartElement = useTemplateRef<HTMLDivElement>('monthChartElement')
+const yearChartElement = useTemplateRef<HTMLDivElement>('yearChartElement')
 
 const { height: weekChartElementHeight } = useElementSize(weekChartElement)
+const { height: monthChartElementHeight } = useElementSize(monthChartElement)
+const { height: yearChartElementHeight } = useElementSize(yearChartElement)
 
-const weekChartHeight = computed(() => Math.max(176, Math.round(weekChartElementHeight.value) - 10))
+const weekChartHeight = computed(() => Math.max(132, Math.round(weekChartElementHeight.value) - 10))
+const monthChartHeight = computed(() => Math.max(118, Math.round(monthChartElementHeight.value) - 10))
+const yearChartHeight = computed(() => Math.max(118, Math.round(yearChartElementHeight.value) - 10))
 const { date, time } = useClock()
 
 const topCards = computed(() => {
@@ -204,7 +210,8 @@ const weatherCard = computed(() => {
     temperature: `${weather?.current.temperature ?? 0}°`,
     apparentTemperature: `${weather?.current.apparentTemperature ?? 0}°`,
     condition: weather?.current.condition ?? 'Unavailable',
-    highLow: `H ${weather?.today.high ?? 0}°  L ${weather?.today.low ?? 0}°`,
+    high: `${weather?.today.high ?? 0}°`,
+    low: `${weather?.today.low ?? 0}°`,
     icon: weather ? weatherIcons[weather.current.iconKey] : fallbackIcon,
     periods: (weather?.periods ?? []).map(period => ({
       ...period,
@@ -264,16 +271,16 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
     <div class="grid flex-1 min-h-0 gap-1.5 xl:grid-cols-[0.82fr_1.04fr_1.04fr_1.12fr] xl:grid-rows-[minmax(0,0.47fr)_minmax(0,0.53fr)]">
       <section class="min-h-0 xl:col-start-1 xl:row-start-1">
         <Card class="h-full min-h-0 border-slate-200 bg-slate-50/80 shadow-none">
-          <CardContent class="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-2 px-3 py-3">
+          <CardContent class="grid h-full min-h-0 grid-rows-[auto_minmax(0,0.9fr)_minmax(0,1.08fr)] gap-2 px-3 py-3">
             <div class="grid grid-cols-2 gap-2">
-              <div class="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 text-center">
-                <p class="truncate font-mono text-[1.28rem] font-semibold tracking-tight text-slate-950">
+              <div class="flex min-h-[4.25rem] items-center justify-center px-1 py-1 text-center">
+                <p class="truncate font-mono text-[1.58rem] font-semibold tracking-tight text-slate-950">
                   {{ date }}
                 </p>
               </div>
 
-              <div class="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 text-center">
-                <p class="truncate font-mono text-[1.28rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+              <div class="flex min-h-[4.25rem] items-center justify-center px-1 py-1 text-center">
+                <p class="truncate font-mono text-[1.58rem] font-semibold tracking-tight text-slate-950 tabular-nums">
                   {{ time }}
                 </p>
               </div>
@@ -281,14 +288,9 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
 
             <div
               v-if="weatherPending"
-              class="grid min-h-0 grid-rows-[minmax(0,1.35fr)_minmax(0,1fr)] gap-2"
+              class="min-h-0"
             >
               <Skeleton class="h-full rounded-xl" />
-              <div class="grid grid-cols-3 gap-2">
-                <Skeleton class="h-full rounded-lg" />
-                <Skeleton class="h-full rounded-lg" />
-                <Skeleton class="h-full rounded-lg" />
-              </div>
             </div>
 
             <div
@@ -300,46 +302,141 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
 
             <div
               v-else
-              class="grid min-h-0 grid-rows-[minmax(0,1.35fr)_minmax(0,1fr)] gap-2"
+              class="min-h-0"
             >
-              <div class="flex h-full min-h-0 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5">
-                <div class="flex h-full w-full flex-col items-center justify-center text-center">
-                  <component
-                    :is="weatherCard.icon"
-                    class="mx-auto size-10 text-brand"
-                  />
-                  <p class="mt-2 text-center font-mono text-[2rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                    {{ weatherCard.temperature }}
+              <div class="flex h-full min-h-0 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3">
+                <div class="flex h-full w-full flex-col items-center justify-between text-center">
+                  <div class="flex flex-col items-center">
+                    <component
+                      :is="weatherCard.icon"
+                      class="mx-auto size-12 text-brand"
+                    />
+                    <p class="mt-2 text-center font-mono text-[2.5rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                      {{ weatherCard.temperature }}
+                    </p>
+                    <p class="mt-1 text-center text-[15px] font-medium text-slate-700">
+                      {{ weatherCard.condition }}
+                    </p>
+                    <p class="mt-1 text-center text-[13px] text-slate-500">
+                      Feels like {{ weatherCard.apparentTemperature }}
+                    </p>
+                    <p class="mt-2 text-center text-[12px] uppercase tracking-[0.16em] text-slate-500">
+                      <span class="font-semibold text-brand">H {{ weatherCard.high }}</span>
+                      <span class="px-2 text-slate-300">·</span>
+                      <span class="font-semibold text-brand">L {{ weatherCard.low }}</span>
+                    </p>
+                  </div>
+
+                  <div class="mt-3 grid w-full grid-cols-3 gap-2 border-t border-slate-200/80 pt-3">
+                    <div
+                      v-for="period in weatherCard.periods"
+                      :key="period.label"
+                      class="flex min-h-0 flex-col items-center justify-center text-center"
+                    >
+                      <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        {{ period.label }}
+                      </p>
+                      <component
+                        :is="period.icon"
+                        class="mt-2 size-4.5 text-brand"
+                      />
+                      <p class="mt-2 font-mono text-[1.08rem] font-semibold text-slate-950 tabular-nums">
+                        {{ period.displayTemp }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="summaryPending"
+              class="min-h-0"
+            >
+              <Skeleton class="h-full rounded-xl" />
+            </div>
+
+            <div
+              v-else-if="summaryError"
+              class="flex min-h-0 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
+            >
+              Unable to load weight totals.
+            </div>
+
+            <div
+              v-else
+              class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5"
+            >
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+                  {{ topCards.week.label }}
+                </p>
+                <p class="mt-1 font-mono text-[1.5rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                  {{ topCards.week.value }}
+                </p>
+              </div>
+
+              <div class="mt-2 grid gap-1.5 md:grid-cols-2">
+                <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
+                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Today
                   </p>
-                  <p class="mt-0.5 text-center text-[13px] font-medium text-slate-700">
-                    {{ weatherCard.condition }}
+                  <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                    {{ topCards.week.today }}
                   </p>
-                  <p class="mt-0.5 text-center text-[12px] text-slate-500">
-                    Feels like {{ weatherCard.apparentTemperature }}
+                </div>
+
+                <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
+                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Remaining this week
                   </p>
-                  <p class="mt-1.5 text-center text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                    {{ weatherCard.highLow }}
+                  <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                    {{ topCards.week.remaining }}
                   </p>
                 </div>
               </div>
 
-              <div class="grid h-full min-h-0 grid-cols-3 gap-2">
-                <div
-                  v-for="period in weatherCard.periods"
-                  :key="period.label"
-                  class="flex h-full flex-col items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 px-2 py-2 text-center"
+              <div
+                ref="weekChartElement"
+                class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
+              >
+                <ChartContainer
+                  :config="chartConfig"
+                  class="h-full w-full"
                 >
-                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    {{ period.label }}
-                  </p>
-                  <component
-                    :is="period.icon"
-                    class="mt-2 size-4 text-brand"
-                  />
-                  <p class="mt-2 font-mono text-[1rem] font-semibold text-slate-950 tabular-nums">
-                    {{ period.displayTemp }}
-                  </p>
-                </div>
+                  <VisXYContainer
+                    :height="weekChartHeight"
+                    :padding="{ top: 2, right: 2, bottom: 18, left: 32 }"
+                  >
+                    <VisGroupedBar
+                      :data="topCards.week.chart"
+                      :x="(datum) => datum.index"
+                      :y="(datum) => datum.pounds"
+                      :color="() => 'var(--color-brand)'"
+                    />
+                    <VisAxis
+                      type="x"
+                      :grid-line="false"
+                      :tick-line="false"
+                      :domain-line="false"
+                      :tick-values="topCards.week.chart.map(point => point.index)"
+                      :tick-format="(tick) => formatChartLabel(tick, topCards.week.chart)"
+                      :tick-padding="1"
+                      tick-text-color="rgb(100 116 139)"
+                      tick-text-font-size="8px"
+                    />
+                    <VisAxis
+                      type="y"
+                      :grid-line="false"
+                      :tick-line="false"
+                      :domain-line="false"
+                      :tick-format="formatAxisPounds"
+                      :num-ticks="5"
+                      tick-text-color="rgb(100 116 139)"
+                      tick-text-font-size="8px"
+                    />
+                  </VisXYContainer>
+                </ChartContainer>
               </div>
             </div>
           </CardContent>
@@ -347,60 +444,45 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
       </section>
 
       <section class="min-h-0 xl:col-span-2 xl:col-start-2 xl:row-start-1">
-        <div
-          v-if="summaryPending"
-          class="grid h-full min-h-0 gap-2 lg:grid-cols-[1.12fr_0.88fr]"
-        >
-          <Skeleton class="h-full rounded-xl" />
-          <div class="grid h-full min-h-0 grid-rows-2 gap-2">
-            <Skeleton class="rounded-xl" />
-            <Skeleton class="rounded-xl" />
-          </div>
-        </div>
-
-        <div
-          v-else-if="summaryError"
-          class="flex h-full items-center rounded-2xl border border-dashed border-rose-200 bg-rose-50 px-5 py-6 text-sm text-rose-700"
-        >
-          Unable to load weight totals.
-        </div>
-
-        <div
-          v-else
-          class="grid h-full min-h-0 gap-2 lg:grid-cols-[1.14fr_0.86fr]"
-        >
+        <div class="grid h-full min-h-0 gap-2 lg:grid-cols-2">
           <div class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
-            <div>
-              <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-                {{ topCards.week.label }}
-              </p>
-              <p class="mt-1 font-mono text-[1.5rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                {{ topCards.week.value }}
-              </p>
-            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+              {{ topCards.month.label }}
+            </p>
 
-            <div class="mt-2 grid gap-1.5 md:grid-cols-2">
-              <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
+            <div class="mt-1.5 grid gap-1.5">
+              <div class="flex min-h-0 flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 text-center">
                 <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Today
+                  Pounds booked
                 </p>
-                <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                  {{ topCards.week.today }}
+                <p class="mt-1.5 font-mono text-[1.9rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                  {{ topCards.month.value }}
                 </p>
               </div>
 
-              <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
-                <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Remaining this week
-                </p>
-                <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                  {{ topCards.week.remaining }}
-                </p>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="min-w-0 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2 text-center">
+                  <p class="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Moves
+                  </p>
+                  <p class="mt-1 truncate font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                    {{ topCards.month.movesThisMonth }}
+                  </p>
+                </div>
+
+                <div class="min-w-0 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2 text-center">
+                  <p class="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Avg. value
+                  </p>
+                  <p class="mt-1 truncate font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                    {{ topCards.month.avgMoveValueThisMonth }}
+                  </p>
+                </div>
               </div>
             </div>
 
             <div
-              ref="weekChartElement"
+              ref="monthChartElement"
               class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
             >
               <ChartContainer
@@ -408,22 +490,24 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                 class="h-full w-full"
               >
                 <VisXYContainer
-                  :height="weekChartHeight"
-                  :padding="{ top: 2, right: 2, bottom: 18, left: 32 }"
+                  :height="monthChartHeight"
+                  :padding="{ top: 2, right: 2, bottom: 18, left: 18 }"
                 >
-                  <VisGroupedBar
-                    :data="topCards.week.chart"
+                  <VisLine
+                    :data="topCards.month.chart"
                     :x="(datum) => datum.index"
                     :y="(datum) => datum.pounds"
                     :color="() => 'var(--color-brand)'"
+                    curve-type="linear"
+                    :line-width="3"
                   />
                   <VisAxis
                     type="x"
                     :grid-line="false"
                     :tick-line="false"
                     :domain-line="false"
-                    :tick-values="topCards.week.chart.map(point => point.index)"
-                    :tick-format="(tick) => formatChartLabel(tick, topCards.week.chart)"
+                    :tick-values="topCards.month.chart.map(point => point.index)"
+                    :tick-format="(tick) => formatChartLabel(tick, topCards.month.chart)"
                     :tick-padding="1"
                     tick-text-color="rgb(100 116 139)"
                     tick-text-font-size="8px"
@@ -434,7 +518,6 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                     :tick-line="false"
                     :domain-line="false"
                     :tick-format="formatAxisPounds"
-                    :num-ticks="5"
                     tick-text-color="rgb(100 116 139)"
                     tick-text-font-size="8px"
                   />
@@ -443,152 +526,65 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
             </div>
           </div>
 
-          <div class="grid h-full min-h-0 grid-rows-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-2">
-            <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-                {{ topCards.month.label }}
+          <div class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+              {{ topCards.year.label }}
+            </p>
+
+            <div class="mt-1.5 flex flex-1 min-h-0 flex-col justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-4 text-center">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Pounds so far
               </p>
-
-              <div class="mt-1.5 grid flex-1 min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-1.5">
-                <div class="flex min-h-0 flex-col justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5">
-                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Pounds booked
-                  </p>
-                  <p class="mt-1.5 font-mono text-[1.9rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                    {{ topCards.month.value }}
-                  </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-1.5">
-                  <div class="min-w-0 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2">
-                    <p class="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Moves
-                    </p>
-                    <p class="mt-1 truncate font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                      {{ topCards.month.movesThisMonth }}
-                    </p>
-                  </div>
-
-                  <div class="min-w-0 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2">
-                    <p class="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Avg. value
-                    </p>
-                    <p class="mt-1 truncate font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                      {{ topCards.month.avgMoveValueThisMonth }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!--
-              <div
-                ref="monthChartElement"
-                class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
-              >
-                <ChartContainer
-                  :config="chartConfig"
-                  class="h-full w-full"
-                >
-                  <VisXYContainer
-                    :height="monthChartHeight"
-                    :padding="{ top: 2, right: 2, bottom: 18, left: 18 }"
-                  >
-                    <VisLine
-                      :data="topCards.month.chart"
-                      :x="(datum) => datum.index"
-                      :y="(datum) => datum.pounds"
-                      :color="() => 'var(--color-brand)'"
-                      curve-type="linear"
-                      :line-width="3"
-                    />
-                    <VisAxis
-                      type="x"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-values="topCards.month.chart.map(point => point.index)"
-                      :tick-format="(tick) => formatChartLabel(tick, topCards.month.chart)"
-                      :tick-padding="1"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                    <VisAxis
-                      type="y"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-format="formatAxisPounds"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                  </VisXYContainer>
-                </ChartContainer>
-              </div>
-              -->
+              <p class="mt-3 font-mono text-[2.28rem] font-semibold leading-none tracking-[-0.035em] text-slate-950 tabular-nums">
+                {{ topCards.year.value }}
+              </p>
+              <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                Running total across 2026
+              </p>
             </div>
 
-            <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-                {{ topCards.year.label }}
-              </p>
-
-              <div class="mt-1.5 flex flex-1 min-h-0 flex-col justify-center rounded-xl border border-slate-200/80 bg-white/85 px-3 py-4 text-center">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Pounds so far
-                </p>
-                <p class="mt-3 font-mono text-[2.28rem] font-semibold leading-none tracking-[-0.035em] text-slate-950 tabular-nums">
-                  {{ topCards.year.value }}
-                </p>
-                <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                  Running total across 2026
-                </p>
-              </div>
-
-              <!--
-              <div
-                ref="yearChartElement"
-                class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
+            <div
+              ref="yearChartElement"
+              class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
+            >
+              <ChartContainer
+                :config="chartConfig"
+                class="h-full w-full"
               >
-                <ChartContainer
-                  :config="chartConfig"
-                  class="h-full w-full"
+                <VisXYContainer
+                  :height="yearChartHeight"
+                  :padding="{ top: 2, right: 2, bottom: 18, left: 18 }"
                 >
-                  <VisXYContainer
-                    :height="yearChartHeight"
-                    :padding="{ top: 2, right: 2, bottom: 18, left: 18 }"
-                  >
-                    <VisLine
-                      :data="topCards.year.chart"
-                      :x="(datum) => datum.index"
-                      :y="(datum) => datum.pounds"
-                      :color="() => 'var(--color-brand)'"
-                      curve-type="linear"
-                      :line-width="3"
-                    />
-                    <VisAxis
-                      type="x"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-values="topCards.year.chart.map(point => point.index)"
-                      :tick-format="(tick) => formatChartLabel(tick, topCards.year.chart)"
-                      :tick-padding="1"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                    <VisAxis
-                      type="y"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-format="formatAxisPounds"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                  </VisXYContainer>
-                </ChartContainer>
-              </div>
-              -->
+                  <VisLine
+                    :data="topCards.year.chart"
+                    :x="(datum) => datum.index"
+                    :y="(datum) => datum.pounds"
+                    :color="() => 'var(--color-brand)'"
+                    curve-type="linear"
+                    :line-width="3"
+                  />
+                  <VisAxis
+                    type="x"
+                    :grid-line="false"
+                    :tick-line="false"
+                    :domain-line="false"
+                    :tick-values="topCards.year.chart.map(point => point.index)"
+                    :tick-format="(tick) => formatChartLabel(tick, topCards.year.chart)"
+                    :tick-padding="1"
+                    tick-text-color="rgb(100 116 139)"
+                    tick-text-font-size="8px"
+                  />
+                  <VisAxis
+                    type="y"
+                    :grid-line="false"
+                    :tick-line="false"
+                    :domain-line="false"
+                    :tick-format="formatAxisPounds"
+                    tick-text-color="rgb(100 116 139)"
+                    tick-text-font-size="8px"
+                  />
+                </VisXYContainer>
+              </ChartContainer>
             </div>
           </div>
         </div>
@@ -664,26 +660,26 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                 <div
                   v-for="job in visibleTodayJobs"
                   :key="job.jobKey"
-                  class="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2"
+                  class="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <p class="truncate text-[13px] font-semibold text-slate-950">
+                      <p class="truncate text-[14px] font-semibold text-slate-950">
                         {{ job.contactName }}
                       </p>
                       <p
                         v-if="job.dayLabel"
-                        class="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand"
+                        class="mt-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-brand"
                       >
                         {{ job.dayLabel }}
                       </p>
                     </div>
-                    <p class="font-mono text-[12px] font-semibold text-emerald-700 tabular-nums">
+                    <p class="font-mono text-[13px] font-semibold text-emerald-700 tabular-nums">
                       {{ job.costLabel }}
                     </p>
                   </div>
 
-                  <div class="mt-1.5 flex flex-wrap gap-1 text-[10px]">
+                  <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">
                     <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono font-semibold text-slate-950">
                       {{ job.weightLabel }}
                     </div>
@@ -701,7 +697,7 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                     </div>
                   </div>
 
-                  <p class="mt-1.5 truncate text-[10px] uppercase tracking-[0.14em] text-slate-500">
+                  <p class="mt-2 truncate text-[10.5px] uppercase tracking-[0.14em] text-slate-500">
                     <span class="font-semibold text-slate-700">{{ job.originTown }}</span>
                     <span class="px-1 italic text-slate-400">to</span>
                     <span class="font-semibold text-slate-700">{{ job.destinationTown }}</span>
@@ -753,19 +749,19 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                 v-for="day in weeklyCalendarDays"
                 :key="day.isoDate"
                 :class="[
-                  'flex h-full min-h-0 flex-col rounded-xl bg-white/85 px-2 py-2',
+                  'flex h-full min-h-0 flex-col rounded-xl bg-white/85 px-2.5 py-2.5',
                   day.isoDate === calendarsCard.todayIso
                     ? 'border-2 border-brand shadow-[inset_0_0_0_1px_rgba(0,109,182,0.14)]'
                     : 'border border-slate-200/80',
                 ]"
               >
-                <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <p class="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   {{ day.label }}
                 </p>
 
                 <div
                   v-if="!day.jobs.length"
-                  class="mt-2 text-[10px] text-slate-400"
+                  class="mt-2 text-[11px] text-slate-400"
                 >
                   No jobs
                 </div>
@@ -777,26 +773,26 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                   <div
                     v-for="job in day.visibleJobs"
                     :key="job.jobKey"
-                    class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5"
+                    class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2"
                   >
                     <div class="flex items-start justify-between gap-1.5">
-                      <p class="line-clamp-2 text-[10px] font-semibold leading-tight text-slate-950">
+                      <p class="line-clamp-2 text-[11px] font-semibold leading-tight text-slate-950">
                         {{ job.contactName }}
                       </p>
-                      <p class="shrink-0 font-mono text-[9px] font-semibold text-emerald-700 tabular-nums">
+                      <p class="shrink-0 font-mono text-[9.5px] font-semibold text-emerald-700 tabular-nums">
                         {{ job.costLabel }}
                       </p>
                     </div>
                     <p
                       v-if="job.dayLabel"
-                      class="mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-brand"
+                      class="mt-1 text-[8.5px] font-semibold uppercase tracking-[0.14em] text-brand"
                     >
                       {{ job.dayLabel }}
                     </p>
-                    <p class="mt-1 text-[9px] font-medium text-slate-700">
+                    <p class="mt-1.5 text-[10px] font-medium text-slate-700">
                       {{ job.weightLabel }} · {{ job.crewLabel }} · {{ job.truckLabel }}<span v-if="job.packingLabel"> · {{ job.packingLabel }}</span>
                     </p>
-                    <p class="mt-1 line-clamp-2 text-[8px] uppercase tracking-[0.14em] text-slate-500">
+                    <p class="mt-1.5 line-clamp-2 text-[8.5px] uppercase tracking-[0.14em] text-slate-500">
                       <span class="font-semibold text-slate-700">{{ job.originTown }}</span>
                       <span class="px-1 italic text-slate-400">to</span>
                       <span class="font-semibold text-slate-700">{{ job.destinationTown }}</span>
@@ -805,7 +801,7 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
 
                   <p
                     v-if="day.hiddenJobs"
-                    class="rounded-md border border-dashed border-slate-300 bg-white/85 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500"
+                    class="rounded-md border border-dashed border-slate-300 bg-white/85 px-2 py-1.5 text-[8.5px] font-semibold uppercase tracking-[0.14em] text-slate-500"
                   >
                     +{{ day.hiddenJobs }} more
                   </p>
