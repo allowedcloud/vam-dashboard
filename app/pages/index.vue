@@ -232,16 +232,9 @@ const calendarsCard = computed(() => ({
   weekDays: calendarsData.value?.weekDays ?? [],
 }))
 
-const MAX_TODAY_JOBS = 4
-const MAX_WEEKLY_JOBS_PER_DAY = 2
-
-const visibleTodayJobs = computed(() => calendarsCard.value.todayJobs.slice(0, MAX_TODAY_JOBS))
-const hiddenTodayJobs = computed(() => Math.max(0, calendarsCard.value.todayJobs.length - visibleTodayJobs.value.length))
-
 const weeklyCalendarDays = computed(() => calendarsCard.value.weekDays.map(day => ({
   ...day,
-  visibleJobs: day.jobs.slice(0, MAX_WEEKLY_JOBS_PER_DAY),
-  hiddenJobs: Math.max(0, day.jobs.length - MAX_WEEKLY_JOBS_PER_DAY),
+  visibleJobs: day.jobs,
 })))
 
 const instagramCard = computed(() => ({
@@ -658,7 +651,7 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
             >
               <div class="grid gap-2">
                 <div
-                  v-for="job in visibleTodayJobs"
+                  v-for="job in calendarsCard.todayJobs"
                   :key="job.jobKey"
                   class="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
                 >
@@ -705,12 +698,6 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                 </div>
               </div>
 
-              <div
-                v-if="hiddenTodayJobs"
-                class="mt-2 rounded-lg border border-dashed border-slate-300 bg-white/75 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-              >
-                {{ hiddenTodayJobs }} more jobs on today's calendar
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -799,12 +786,6 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
                     </p>
                   </div>
 
-                  <p
-                    v-if="day.hiddenJobs"
-                    class="rounded-md border border-dashed border-slate-300 bg-white/85 px-2 py-1.5 text-[8.5px] font-semibold uppercase tracking-[0.14em] text-slate-500"
-                  >
-                    +{{ day.hiddenJobs }} more
-                  </p>
                 </div>
               </div>
             </div>
