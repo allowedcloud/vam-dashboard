@@ -17,6 +17,7 @@ import {
 import { VisAxis, VisGroupedBar, VisLine, VisXYContainer } from '@unovis/vue'
 import InstagramFeed from '~/components/dashboard/InstagramFeed.vue'
 import RegionalMoveMap from '~/components/dashboard/RegionalMoveMap.vue'
+import TodayAtAGlance from '~/components/dashboard/TodayAtAGlance.vue'
 
 interface ChartPoint {
   label: string
@@ -241,6 +242,21 @@ const instagramCard = computed(() => ({
   posts: instagramData.value?.posts ?? [],
 }))
 
+function parseWeightLabel(value: string) {
+  const numeric = Number.parseInt(value.replace(/[^\d]/g, ''), 10)
+  return Number.isFinite(numeric) ? numeric : 0
+}
+
+const todayAtAGlance = computed(() => {
+  const jobsCount = calendarsCard.value.todayJobs.length
+  const totalPounds = calendarsCard.value.todayJobs.reduce((sum, job) => sum + parseWeightLabel(job.weightLabel), 0)
+
+  return {
+    jobsCount,
+    totalPoundsLabel: `${poundFormatter.format(totalPounds)} lbs`,
+  }
+})
+
 function formatAxisPounds(value: number | Date) {
   if (typeof value !== 'number') {
     return ''
@@ -264,7 +280,7 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
     <div class="grid flex-1 min-h-0 gap-1.5 xl:grid-cols-[0.82fr_1.04fr_1.04fr_1.12fr] xl:grid-rows-[minmax(0,0.47fr)_minmax(0,0.53fr)]">
       <section class="min-h-0 xl:col-start-1 xl:row-start-1">
         <Card class="h-full min-h-0 border-slate-200 bg-slate-50/80 shadow-none">
-          <CardContent class="grid h-full min-h-0 grid-rows-[auto_minmax(0,0.9fr)_minmax(0,1.08fr)] gap-2 px-3 py-3">
+          <CardContent class="grid h-full min-h-0 grid-rows-[auto_minmax(0,0.82fr)_minmax(0,0.34fr)] gap-2 px-3 py-3">
             <div class="grid grid-cols-2 gap-2">
               <div class="flex min-h-[4.25rem] items-center justify-center px-1 py-1 text-center">
                 <p class="truncate font-mono text-[1.58rem] font-semibold tracking-tight text-slate-950">
@@ -297,43 +313,43 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
               v-else
               class="min-h-0"
             >
-              <div class="flex h-full min-h-0 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3">
-                <div class="flex h-full w-full flex-col items-center justify-between text-center">
-                  <div class="flex flex-col items-center">
+              <div class="flex h-full min-h-0 rounded-xl border border-slate-200/80 bg-white/80 px-2.5 py-3">
+                <div class="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
+                  <div class="mb-6 flex flex-col items-center">
                     <component
                       :is="weatherCard.icon"
-                      class="mx-auto size-12 text-brand"
+                      class="mx-auto size-16 text-brand"
                     />
-                    <p class="mt-2 text-center font-mono text-[2.5rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                    <p class="mt-3 text-center font-mono text-[4.1rem] font-semibold tracking-tight text-slate-950 tabular-nums">
                       {{ weatherCard.temperature }}
                     </p>
-                    <p class="mt-1 text-center text-[15px] font-medium text-slate-700">
+                    <p class="mt-2 text-center text-[22px] font-medium text-slate-700">
                       {{ weatherCard.condition }}
                     </p>
-                    <p class="mt-1 text-center text-[13px] text-slate-500">
+                    <p class="mt-2 text-center text-[20px] font-medium text-slate-500">
                       Feels like {{ weatherCard.apparentTemperature }}
                     </p>
-                    <p class="mt-2 text-center text-[12px] uppercase tracking-[0.16em] text-slate-500">
+                    <p class="mt-3 text-center text-[18px] uppercase tracking-[0.14em] text-slate-500">
                       <span class="font-semibold text-brand">H {{ weatherCard.high }}</span>
                       <span class="px-2 text-slate-300">·</span>
                       <span class="font-semibold text-brand">L {{ weatherCard.low }}</span>
                     </p>
                   </div>
 
-                  <div class="mt-3 grid w-full grid-cols-3 gap-2 border-t border-slate-200/80 pt-3">
+                  <div class="mt-2 grid w-full grid-cols-3 gap-2">
                     <div
                       v-for="period in weatherCard.periods"
                       :key="period.label"
                       class="flex min-h-0 flex-col items-center justify-center text-center"
                     >
-                      <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                         {{ period.label }}
                       </p>
                       <component
                         :is="period.icon"
-                        class="mt-2 size-4.5 text-brand"
+                        class="mt-3 size-6 text-brand"
                       />
-                      <p class="mt-2 font-mono text-[1.08rem] font-semibold text-slate-950 tabular-nums">
+                      <p class="mt-3 font-mono text-[1.7rem] font-semibold text-slate-950 tabular-nums">
                         {{ period.displayTemp }}
                       </p>
                     </div>
@@ -343,101 +359,265 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
             </div>
 
             <div
-              v-if="summaryPending"
+              v-if="calendarsPending"
               class="min-h-0"
             >
               <Skeleton class="h-full rounded-xl" />
             </div>
 
             <div
-              v-else-if="summaryError"
+              v-else-if="calendarsError"
               class="flex min-h-0 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
             >
-              Unable to load weight totals.
+              Unable to load daily stats.
             </div>
 
             <div
               v-else
-              class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5"
+              class="min-h-0"
             >
-              <div>
-                <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-                  {{ topCards.week.label }}
-                </p>
-                <p class="mt-1 font-mono text-[1.5rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                  {{ topCards.week.value }}
-                </p>
-              </div>
-
-              <div class="mt-2 grid gap-1.5 md:grid-cols-2">
-                <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
-                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Today
-                  </p>
-                  <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                    {{ topCards.week.today }}
-                  </p>
-                </div>
-
-                <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1.5">
-                  <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Remaining this week
-                  </p>
-                  <p class="mt-1 font-mono text-[0.95rem] font-semibold tracking-tight text-slate-950 tabular-nums">
-                    {{ topCards.week.remaining }}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                ref="weekChartElement"
-                class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
-              >
-                <ChartContainer
-                  :config="chartConfig"
-                  class="h-full w-full"
-                >
-                  <VisXYContainer
-                    :height="weekChartHeight"
-                    :padding="{ top: 2, right: 2, bottom: 18, left: 32 }"
-                  >
-                    <VisGroupedBar
-                      :data="topCards.week.chart"
-                      :x="(datum) => datum.index"
-                      :y="(datum) => datum.pounds"
-                      :color="() => 'var(--color-brand)'"
-                    />
-                    <VisAxis
-                      type="x"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-values="topCards.week.chart.map(point => point.index)"
-                      :tick-format="(tick) => formatChartLabel(tick, topCards.week.chart)"
-                      :tick-padding="1"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                    <VisAxis
-                      type="y"
-                      :grid-line="false"
-                      :tick-line="false"
-                      :domain-line="false"
-                      :tick-format="formatAxisPounds"
-                      :num-ticks="5"
-                      tick-text-color="rgb(100 116 139)"
-                      tick-text-font-size="8px"
-                    />
-                  </VisXYContainer>
-                </ChartContainer>
-              </div>
+              <TodayAtAGlance
+                :jobs-count="todayAtAGlance.jobsCount"
+                :total-pounds-label="todayAtAGlance.totalPoundsLabel"
+              />
             </div>
+
           </CardContent>
         </Card>
       </section>
 
       <section class="min-h-0 xl:col-span-2 xl:col-start-2 xl:row-start-1">
-        <div class="grid h-full min-h-0 gap-2 lg:grid-cols-2">
+        <div class="grid h-full min-h-0 gap-2 lg:grid-cols-[1.26fr_0.9fr]">
+          <Card class="h-full min-h-0 border-slate-200 bg-slate-50/80 shadow-none">
+            <CardContent class="flex h-full min-h-0 flex-col px-3 pb-3 pt-2">
+              <div class="flex items-baseline justify-between gap-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+                  Daily calendar
+                </p>
+                <p class="text-[9px] uppercase tracking-[0.16em] text-slate-500">
+                  {{ calendarsCard.todayLabel }}
+                </p>
+              </div>
+
+              <div
+                v-if="calendarsPending"
+                class="mt-2 space-y-2"
+              >
+                <Skeleton class="h-20 rounded-xl" />
+                <Skeleton class="h-20 rounded-xl" />
+                <Skeleton class="h-20 rounded-xl" />
+              </div>
+
+              <div
+                v-else-if="calendarsError"
+                class="mt-2 flex flex-1 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
+              >
+                Unable to load calendar jobs.
+              </div>
+
+              <div
+                v-else-if="!calendarsCard.todayJobs.length"
+                class="mt-2 flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/70 px-4 py-8 text-center text-sm text-slate-500"
+              >
+                No jobs on today's calendar.
+              </div>
+
+              <div
+                v-else
+                class="mt-2 flex min-h-0 flex-1 flex-col"
+              >
+                <div class="grid gap-2">
+                  <div
+                    v-for="job in calendarsCard.todayJobs"
+                    :key="job.jobKey"
+                    class="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="truncate text-[14px] font-semibold text-slate-950">
+                          {{ job.contactName }}
+                        </p>
+                        <p
+                          v-if="job.dayLabel"
+                          class="mt-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-brand"
+                        >
+                          {{ job.dayLabel }}
+                        </p>
+                      </div>
+                      <p class="font-mono text-[13px] font-semibold text-emerald-700 tabular-nums">
+                        {{ job.costLabel }}
+                      </p>
+                    </div>
+
+                    <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                      <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono font-semibold text-slate-950">
+                        {{ job.weightLabel }}
+                      </div>
+                      <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800">
+                        {{ job.crewLabel }}
+                      </div>
+                      <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800">
+                        {{ job.truckLabel }}
+                      </div>
+                      <div
+                        v-if="job.packingLabel"
+                        class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800"
+                      >
+                        {{ job.packingLabel }}
+                      </div>
+                    </div>
+
+                    <p class="mt-2 truncate text-[10.5px] uppercase tracking-[0.14em] text-slate-500">
+                      <span class="font-semibold text-slate-700">{{ job.originTown }}</span>
+                      <span class="px-1 italic text-slate-400">to</span>
+                      <span class="font-semibold text-slate-700">{{ job.destinationTown }}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div
+            v-if="summaryPending"
+            class="min-h-0"
+          >
+            <Skeleton class="h-full rounded-xl" />
+          </div>
+
+          <div
+            v-else-if="summaryError"
+            class="flex min-h-0 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
+          >
+            Unable to load weight totals.
+          </div>
+
+          <div
+            v-else
+            class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5"
+          >
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+                {{ topCards.week.label }}
+              </p>
+              <p class="mt-1 font-mono text-[1.7rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                {{ topCards.week.value }}
+              </p>
+            </div>
+
+            <div class="mt-2 grid gap-1.5">
+              <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2">
+                <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Today
+                </p>
+                <p class="mt-1 font-mono text-[1rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                  {{ topCards.week.today }}
+                </p>
+              </div>
+
+              <div class="rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-2">
+                <p class="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Remaining this week
+                </p>
+                <p class="mt-1 font-mono text-[1rem] font-semibold tracking-tight text-slate-950 tabular-nums">
+                  {{ topCards.week.remaining }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              ref="weekChartElement"
+              class="mt-2 flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white/80 px-1.5 pb-1.5 pt-1"
+            >
+              <ChartContainer
+                :config="chartConfig"
+                class="h-full w-full"
+              >
+                <VisXYContainer
+                  :height="weekChartHeight"
+                  :padding="{ top: 2, right: 2, bottom: 18, left: 32 }"
+                >
+                  <VisGroupedBar
+                    :data="topCards.week.chart"
+                    :x="(datum) => datum.index"
+                    :y="(datum) => datum.pounds"
+                    :color="() => 'var(--color-brand)'"
+                  />
+                  <VisAxis
+                    type="x"
+                    :grid-line="false"
+                    :tick-line="false"
+                    :domain-line="false"
+                    :tick-values="topCards.week.chart.map(point => point.index)"
+                    :tick-format="(tick) => formatChartLabel(tick, topCards.week.chart)"
+                    :tick-padding="1"
+                    tick-text-color="rgb(100 116 139)"
+                    tick-text-font-size="8px"
+                  />
+                  <VisAxis
+                    type="y"
+                    :grid-line="false"
+                    :tick-line="false"
+                    :domain-line="false"
+                    :tick-format="formatAxisPounds"
+                    :num-ticks="5"
+                    tick-text-color="rgb(100 116 139)"
+                    tick-text-font-size="8px"
+                  />
+                </VisXYContainer>
+              </ChartContainer>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="min-h-0 xl:col-start-4 xl:row-start-1">
+        <Card class="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-slate-200 bg-slate-50/80 py-0 shadow-none">
+          <CardContent class="flex h-full min-h-0 flex-1 flex-col p-0">
+            <div
+              v-if="mapPending"
+              class="flex-1"
+            >
+              <Skeleton class="h-full rounded-none" />
+            </div>
+
+            <div
+              v-else-if="mapError"
+              class="flex flex-1 items-center bg-rose-50 px-4 py-6 text-sm text-rose-700"
+            >
+              Unable to load destination data.
+            </div>
+
+            <div
+              v-else
+              class="flex-1 min-h-0"
+            >
+              <RegionalMoveMap :points="mapCard.points" />
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section class="min-h-0 xl:col-start-1 xl:row-start-2">
+        <div
+          v-if="summaryPending"
+          class="grid h-full min-h-0 gap-2"
+        >
+          <Skeleton class="h-full rounded-xl" />
+          <Skeleton class="h-full rounded-xl" />
+        </div>
+
+        <div
+          v-else-if="summaryError"
+          class="flex h-full min-h-0 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
+        >
+          Unable to load weight totals.
+        </div>
+
+        <div
+          v-else
+          class="grid h-full min-h-0 gap-2"
+        >
           <div class="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
             <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
               {{ topCards.month.label }}
@@ -581,126 +761,6 @@ function formatChartLabel(tick: number | Date, points: Array<{ label: string, in
             </div>
           </div>
         </div>
-      </section>
-
-      <section class="min-h-0 xl:col-start-4 xl:row-start-1">
-        <Card class="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-slate-200 bg-slate-50/80 py-0 shadow-none">
-          <CardContent class="flex h-full min-h-0 flex-1 flex-col p-0">
-            <div
-              v-if="mapPending"
-              class="flex-1"
-            >
-              <Skeleton class="h-full rounded-none" />
-            </div>
-
-            <div
-              v-else-if="mapError"
-              class="flex flex-1 items-center bg-rose-50 px-4 py-6 text-sm text-rose-700"
-            >
-              Unable to load destination data.
-            </div>
-
-            <div
-              v-else
-              class="flex-1 min-h-0"
-            >
-              <RegionalMoveMap :points="mapCard.points" />
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section class="min-h-0 xl:col-start-1 xl:row-start-2">
-        <Card class="h-full min-h-0 border-slate-200 bg-slate-50/80 shadow-none">
-          <CardContent class="flex h-full min-h-0 flex-col px-3 pb-3 pt-2">
-            <div class="flex items-baseline justify-between gap-3">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-                Daily calendar
-              </p>
-              <p class="text-[9px] uppercase tracking-[0.16em] text-slate-500">
-                {{ calendarsCard.todayLabel }}
-              </p>
-            </div>
-
-            <div
-              v-if="calendarsPending"
-              class="mt-2 space-y-2"
-            >
-              <Skeleton class="h-20 rounded-xl" />
-              <Skeleton class="h-20 rounded-xl" />
-              <Skeleton class="h-20 rounded-xl" />
-            </div>
-
-            <div
-              v-else-if="calendarsError"
-              class="mt-2 flex flex-1 items-center rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-700"
-            >
-              Unable to load calendar jobs.
-            </div>
-
-            <div
-              v-else-if="!calendarsCard.todayJobs.length"
-              class="mt-2 flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/70 px-4 py-8 text-center text-sm text-slate-500"
-            >
-              No jobs on today's calendar.
-            </div>
-
-            <div
-              v-else
-              class="mt-2 flex min-h-0 flex-1 flex-col"
-            >
-              <div class="grid gap-2">
-                <div
-                  v-for="job in calendarsCard.todayJobs"
-                  :key="job.jobKey"
-                  class="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="truncate text-[14px] font-semibold text-slate-950">
-                        {{ job.contactName }}
-                      </p>
-                      <p
-                        v-if="job.dayLabel"
-                        class="mt-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-brand"
-                      >
-                        {{ job.dayLabel }}
-                      </p>
-                    </div>
-                    <p class="font-mono text-[13px] font-semibold text-emerald-700 tabular-nums">
-                      {{ job.costLabel }}
-                    </p>
-                  </div>
-
-                  <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">
-                    <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono font-semibold text-slate-950">
-                      {{ job.weightLabel }}
-                    </div>
-                    <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800">
-                      {{ job.crewLabel }}
-                    </div>
-                    <div class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800">
-                      {{ job.truckLabel }}
-                    </div>
-                    <div
-                      v-if="job.packingLabel"
-                      class="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-medium text-slate-800"
-                    >
-                      {{ job.packingLabel }}
-                    </div>
-                  </div>
-
-                  <p class="mt-2 truncate text-[10.5px] uppercase tracking-[0.14em] text-slate-500">
-                    <span class="font-semibold text-slate-700">{{ job.originTown }}</span>
-                    <span class="px-1 italic text-slate-400">to</span>
-                    <span class="font-semibold text-slate-700">{{ job.destinationTown }}</span>
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       <section class="min-h-0 xl:col-span-2 xl:col-start-2 xl:row-start-2">

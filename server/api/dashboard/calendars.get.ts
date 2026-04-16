@@ -202,7 +202,8 @@ function sortJobs(jobs: BackendCalendarJob[]) {
   })
 }
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  setHeader(event, 'cache-control', 'no-store')
   const runtimeConfig = useRuntimeConfig()
   const baseUrl = runtimeConfig.mipBackendBaseUrl
   const token = runtimeConfig.mipBackendApiToken
